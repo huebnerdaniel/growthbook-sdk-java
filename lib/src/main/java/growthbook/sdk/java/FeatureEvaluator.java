@@ -2,6 +2,7 @@ package growthbook.sdk.java;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.Nullable;
 import java.net.MalformedURLException;
@@ -11,6 +12,7 @@ import java.util.List;
 /**
  * <b>INTERNAL</b>: Implementation of feature evaluation
  */
+@Slf4j
 class FeatureEvaluator implements IFeatureEvaluator {
 
     private final GrowthBookJsonUtils jsonUtils = GrowthBookJsonUtils.getInstance();
@@ -65,7 +67,7 @@ class FeatureEvaluator implements IFeatureEvaluator {
                     .build();
 
             if (featureJson == null) {
-                System.out.println("featureJson is null");
+                log.debug("featureJson is null for [{}]", key);
 
                 // When key exists but there is no value, should be default value with null value
                 if (featureUsageCallback != null) {
@@ -229,7 +231,7 @@ class FeatureEvaluator implements IFeatureEvaluator {
             }
             return defaultValueFeatureResult;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error evaluating feature [{}]", key, e);
             return emptyFeature;
         }
     }
@@ -262,7 +264,7 @@ class FeatureEvaluator implements IFeatureEvaluator {
 
             return GrowthBookUtils.getForcedSerializableValueFromUrl(key, url, valueTypeClass, jsonUtils.gson);
         } catch (MalformedURLException | ClassCastException e) {
-            e.printStackTrace();
+            log.error("Error evaluating forced feature [{}] from URL [{}]", key, urlString, e);
             return null;
         }
     }

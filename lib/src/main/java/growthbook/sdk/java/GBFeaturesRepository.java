@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;
@@ -24,6 +25,7 @@ import java.util.concurrent.TimeUnit;
  * Get the features JSON with {@link GBFeaturesRepository#getFeaturesJson()}.
  * You would provide the features JSON when creating the {@link GBContext}
  */
+@Slf4j
 public class GBFeaturesRepository implements IGBFeaturesRepository {
 
     @Getter
@@ -174,7 +176,7 @@ public class GBFeaturesRepository implements IGBFeaturesRepository {
                 try {
                     self.onSuccess(response);
                 } catch (FeatureFetchException e) {
-                    e.printStackTrace();
+                    log.error("Error refreshing features", e);
                 }
             }
         });
@@ -249,8 +251,7 @@ public class GBFeaturesRepository implements IGBFeaturesRepository {
         this.sseHttpClient.newCall(sseRequest).enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                System.out.println("SSE connection failed");
-                e.printStackTrace();
+                log.error("SSE connection failed", e);
             }
 
             @Override
@@ -302,7 +303,7 @@ public class GBFeaturesRepository implements IGBFeaturesRepository {
 
             this.onSuccess(response);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Error fetching features", e);
 
             throw new FeatureFetchException(
                 FeatureFetchException.FeatureFetchErrorCode.UNKNOWN,
@@ -352,7 +353,7 @@ public class GBFeaturesRepository implements IGBFeaturesRepository {
 
             this.onRefreshSuccess(this.featuresJson);
         } catch (DecryptionUtils.DecryptionException e) {
-            e.printStackTrace();
+            log.error("Error reading response", e);
 
             throw new FeatureFetchException(
                 FeatureFetchException.FeatureFetchErrorCode.UNKNOWN,
@@ -388,7 +389,7 @@ public class GBFeaturesRepository implements IGBFeaturesRepository {
 
             onResponseJson(responseBody.string());
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Error fetching features", e);
 
             throw new FeatureFetchException(
                 FeatureFetchException.FeatureFetchErrorCode.UNKNOWN,
@@ -424,7 +425,7 @@ public class GBFeaturesRepository implements IGBFeaturesRepository {
             try {
                 handler.onFeaturesResponse(data);
             } catch (FeatureFetchException e) {
-                e.printStackTrace();
+                log.error("Error on handling features response", e);
             }
         }
 
